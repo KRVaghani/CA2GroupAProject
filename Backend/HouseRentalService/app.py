@@ -4,6 +4,7 @@ from flask_mysqldb import MySQL
 import jwt
 from functools import wraps
 import os
+from flask_mail import Mail
 
 
 mysql = MySQL()
@@ -87,6 +88,8 @@ def create_property():
     return jsonify({'success': True}), 201
 
 
+
+
 @app.route('/properties', methods=['GET'])
 def get_properties():
     
@@ -98,6 +101,80 @@ def get_properties():
     cursor.close()
 
     return jsonify(results), 200
+
+
+@app.route("/update_property", endpoint='update_property', methods=['PUT'])
+def update_property():
+
+    data = request.get_json()
+    print(data)
+
+    # Extract the data from the request
+    property_id = data['property_id']
+    owner_id = data['owner_id']
+    address = data['address']
+    bedrooms = data['bedrooms']
+    description = data['description']
+    price = data['price']
+    url = data['url']
+    property_type = data['property_type']
+
+    # Query MySQL database to check if the property exists
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT * FROM properties WHERE id=%s", (property_id,))
+    result = cursor.fetchone()
+
+    # If the property does not exist, return an error message
+    if result is None:
+        cursor.close()
+        return jsonify({"error": "Property does not exist"}), 404
+
+    # Otherwise, update the property in the database
+    cursor.execute("UPDATE properties SET owner_id=%s, address=%s, bedrooms=%s, description=%s, price=%s, url=%s, type=%s WHERE id=%s", (owner_id, address, bedrooms, description, price, url, property_type, property_id))
+    mysql.connection.commit()
+    cursor.close()
+
+    # Return a success message
+    return jsonify({"update_property": "success"}), 200
+
+@app.route("/submit_property_request", endpoint='submit_property_request', methods=['POST'])
+def submit_property_request():
+
+    data = request.get_json()
+    property_id = data['property_id']
+    name = data['name']
+    email = data['email']
+    phone = data['phone']
+    description_message = data['description_message']
+
+    # Query the MySQL database to get the owner's email address
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT o.email FROM properties p JOIN house_owners o ON p.owner_id=o.id WHERE p.id=%s", (property_id,))
+    result = cursor.fetchone()
+    cursor.close()
+
+    if result is None:
+        abort(404)
+
+    owner_email = result[0]
+
+    # Send an email notification to the property owner
+    # You can use a library like Flask-Mail to send emails
+    # Here is an example using Flask-Mail
+    msg = Message(subject="New Property Request",
+                  sender="noreply@example.com",
+                  recipients=[owner_email])
+    msg.body = f"You have a new property request for property ID {property_id}. \n\nName: {name}\nEmail: {email}\nPhone: {phone}\n\nMessage:\n{description_message}"
+    mail.send(msg)
+
+    # Insert the property request into the MySQL database
+    cursor = mysql.connection.cursor()
+    cursor.execute("INSERT INTO property_request (property_id, name, email, phone, description_message) VALUES (%s, %s, %s, %s, %s)",
+                   (property_id, name, email, phone, description_message))
+    mysql.connection.commit()
+    cursor.close()
+
+    return jsonify({"message": "Property request submitted successfully."}), 200
 
 
 if __name__ == '__main__':
