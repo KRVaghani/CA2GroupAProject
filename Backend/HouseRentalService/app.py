@@ -100,5 +100,39 @@ def get_properties():
     return jsonify(results), 200
 
 
+@app.route("/update_property", endpoint='update_property', methods=['PUT'])
+def update_property():
+
+    data = request.get_json()
+    print(data)
+
+    # Extract the data from the request
+    property_id = data['property_id']
+    owner_id = data['owner_id']
+    address = data['address']
+    bedrooms = data['bedrooms']
+    description = data['description']
+    price = data['price']
+    url = data['url']
+    property_type = data['property_type']
+
+    # Query MySQL database to check if the property exists
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT * FROM properties WHERE id=%s", (property_id,))
+    result = cursor.fetchone()
+
+    # If the property does not exist, return an error message
+    if result is None:
+        cursor.close()
+        return jsonify({"error": "Property does not exist"}), 404
+
+    # Otherwise, update the property in the database
+    cursor.execute("UPDATE properties SET owner_id=%s, address=%s, bedrooms=%s, description=%s, price=%s, url=%s, type=%s WHERE id=%s", (owner_id, address, bedrooms, description, price, url, property_type, property_id))
+    mysql.connection.commit()
+    cursor.close()
+
+    # Return a success message
+    return jsonify({"update_property": "success"}), 200
+
 if __name__ == '__main__':
     app.run(debug=True)
