@@ -176,6 +176,71 @@ def submit_property_request():
 
     return jsonify({"message": "Property request submitted successfully."}), 200
 
+@app.route("/filter_properties", endpoint='filter_properties', methods=['GET'])
+def filter_properties():
+
+    # Get the filter query parameters
+    property_type = request.args.get('type')
+    city = request.args.get('city')
+
+    # Build the SQL query based on the filter parameters
+    sql_query = "SELECT * FROM properties"
+    query_params = []
+    if property_type is not None or city is not None:
+        sql_query += " WHERE"
+        if property_type is not None:
+            sql_query += " type=%s"
+            query_params.append(property_type)
+        if city is not None:
+            if len(query_params) > 0:
+                sql_query += " AND"
+            sql_query += " city=%s"
+            query_params.append(city)
+
+    # Query MySQL database for properties that match the filter criteria
+    cursor = mysql.connection.cursor()
+    cursor.execute(sql_query, tuple(query_params))
+    result = cursor.fetchall()
+    cursor.close()
+
+    # Return the matching properties as a JSON response
+    return jsonify({"properties": result}), 200
+
+@app.route("/change_password", endpoint='change_password', methods=['POST'])
+def change_password():
+
+
+    data = request.get_json()
+    
+
+    # Extract the data from the request
+    email = data['email']
+    current_password = data['current_password']
+    new_password = data['new_password']
+    confirm_password = data['confirm_password']
+
+    # Query MySQL database to check if the house owner with the given email and password exists
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT * FROM house_owners WHERE email=%s AND password=%s", (email, current_password))
+    result = cursor.fetchone()
+
+    # If the house owner does not exist, return an error message
+    if result is None:
+        cursor.close()
+        return jsonify({"error": "Invalid email or password"}), 401
+
+    # If the new password and confirm password do not match, return an error message
+    if new_password != confirm_password:
+        cursor.close()
+        return jsonify({"error": "New password and confirm password do not match"}), 400
+
+    # Otherwise, update the house owner's password in the database
+    cursor.execute("UPDATE house_owners SET password=%s WHERE email=%s", (new_password, email))
+    mysql.connection.commit()
+    cursor.close()
+
+    # Return a success message
+    return jsonify({"change_password": "success"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
