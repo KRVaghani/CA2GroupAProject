@@ -6,11 +6,9 @@ from functools import wraps
 import os
 from flask_mail import Mail
 
-
 mysql = MySQL()
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-
 
 @app.route('/api', methods=['POST'])
 def api():
@@ -241,6 +239,48 @@ def change_password():
 
     # Return a success message
     return jsonify({"change_password": "success"}), 200
+
+@app.route("/delete_property", endpoint='delete_property', methods=['DELETE'])
+def delete_property():
+
+    data = request.get_json()
+    print(data)
+
+    # Extract the data from the request
+    property_id = data['property_id']
+
+    # Query MySQL database to check if the property exists
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT * FROM properties WHERE id=%s", (property_id,))
+    result = cursor.fetchone()
+
+    # If the property does not exist, return an error message
+    if result is None:
+        cursor.close()
+        return jsonify({"error": "Property does not exist"}), 404
+
+    # Otherwise, delete the property from the database
+    cursor.execute("DELETE FROM properties WHERE id=%s", (property_id,))
+    mysql.connection.commit()
+    cursor.close()
+
+    # Return a success message
+    return jsonify({"delete_property": "success"}), 200
+
+@app.route("/search_properties", endpoint='search_properties', methods=['GET'])
+def search_properties():
+
+    # Get the search query parameters
+    search_query = request.args.get('q')
+
+    # Query MySQL database for properties that match the search query
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT * FROM properties WHERE address LIKE %s OR description LIKE %s", ('%' + search_query + '%', '%' + search_query + '%'))
+    result = cursor.fetchall()
+    cursor.close()
+
+    # Return the matching properties as a JSON response
+    return jsonify({"properties": result}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
