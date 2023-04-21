@@ -4,7 +4,7 @@ from flask_mysqldb import MySQL
 import jwt
 from functools import wraps
 import os
-from flask_mail import Mail
+from flask_mail import Mail,Message
 
 
 mysql = MySQL()
@@ -146,23 +146,31 @@ def submit_property_request():
     email = data['email']
     phone = data['phone']
     description_message = data['description_message']
+    
+    
 
     # Query the MySQL database to get the owner's email address
     cursor = mysql.connection.cursor()
     cursor.execute("SELECT o.email FROM properties p JOIN house_owners o ON p.owner_id=o.id WHERE p.id=%s", (property_id,))
     result = cursor.fetchone()
     cursor.close()
-
+        
     if result is None:
         abort(404)
 
     owner_email = result[0]
+    app.config['MAIL_SERVER'] = 'smtp.office365.com'
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USERNAME'] = 'sampledbsproject@outlook.com'
+    app.config['MAIL_PASSWORD'] = 'Dublin@14'
+    mail = Mail(app)
 
     # Send an email notification to the property owner
     # You can use a library like Flask-Mail to send emails
     # Here is an example using Flask-Mail
     msg = Message(subject="New Property Request",
-                  sender="noreply@example.com",
+                  sender="sampledbsproject@outlook.com",
                   recipients=[owner_email])
     msg.body = f"You have a new property request for property ID {property_id}. \n\nName: {name}\nEmail: {email}\nPhone: {phone}\n\nMessage:\n{description_message}"
     mail.send(msg)
