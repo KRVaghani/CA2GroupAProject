@@ -4,8 +4,7 @@ from flask_mysqldb import MySQL
 import jwt
 from functools import wraps
 import os
-from flask_mail import Mail, Message
-
+from flask_mail import Mail,Message
 from flask_session import Session
 import jwt
 import secrets
@@ -14,12 +13,10 @@ import secrets
 
 mysql = MySQL()
 app = Flask(__name__)
-app.secret_key = "eyJhbGciOiJIUzI1NiJ9.ew0KICAic3ViIjogIjEyMzQ1Njc4OTAiLA0KICAibmFtZSI6ICJBbmlzaCBOYXRoIiwNCiAgImlhdCI6IDE1MTYyMzkwMjINCn0.X3ZBXE9ycu4xJ4pPHc9QMP8gsOIe0Dez00F-m6Y6NAU"
-
 # CORS(app, resources={r"/*": {"origins": "*"}})
 
-# CORS(app,supports_credentials=True)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+CORS(app,supports_credentials=True)
+
 
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
@@ -33,8 +30,10 @@ def api():
 # MySQL configuration
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'kv1897'
+#app.config['MYSQL_PASSWORD'] = 'Admin@123'
 app.config['MYSQL_DB'] = 'housepro'
 app.config['MYSQL_HOST'] = 'localhost' 
+app.config["MYSQL_CURSORCLASS"] = "DictCursor"
 mysql.init_app(app)
 
 
@@ -50,13 +49,16 @@ mail = Mail(app)
 
 mail = Mail(app)
 
-# Generate a random string of characters
+"""
+Generate a random string of characters
 secret_key = os.urandom(32)
 
-# Secret key for JWT
+Secret key for JWT
 
-key=secrets.token_hex(16)
-app.config['SECRET_KEY'] = key
+secrets.token_hex(32)
+"""
+
+app.config['SECRET_KEY'] = "8c4f4f381f7ccf0b7e7ca765be6a99fc088073e7e329834ff34fad4dc37bcf04"
 
 def authenticate(f):
     @wraps(f)
@@ -66,10 +68,13 @@ def authenticate(f):
         token = request.headers.get('Authorization')
         try:
             # Verify JWT token
+
             decoded = jwt.decode(
                 token, app.config['SECRET_KEY'], algorithms=['HS256'])
-            g.current_user = decoded['user_id']
-        except:
+            print(decoded)
+            g.current_user = decoded['owner_id']
+        except Exception as e:
+            print("Exception :>>>", str(e))
             abort(401)
         return f(*args, **kwargs)
     return wrapper
@@ -95,53 +100,34 @@ def login():
     if result is None:
         abort(401)
     else:
-
-        owner_id = result[0]
+        print(result)
+        owner_id = result.get("id")
         session['owner_id'] = owner_id
-        token = jwt.encode({'sub': owner_id}, app.config['SECRET_KEY'], algorithm='HS256')
+        token = jwt.encode({'sub': owner_id, "owner_id": owner_id}, app.config['SECRET_KEY'], algorithm='HS256')
 
         return jsonify({'token': token}), 200
 
 
 @app.route("/property", endpoint='property', methods=['POST'])
-# @authenticate
+@authenticate
 def add_property():
-
-    
-
-    auth_header = request.headers.get('Authorization')
-    # if g.current_user is None:
-    #     return jsonify({'error': 'Unauthorized.'}), 401
-
-    if not auth_header:
-        return jsonify({'error': 'Authorization header missing.'}), 401
-    
-    try:
-        token = auth_header.split(' ')[1]
-        data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-    except:
-        return jsonify({'error': 'Invalid token.'}), 401
-    
-    if not session.get('owner_id'):
-        return jsonify({'error': 'User ID missing from token.'}), 401
-
 
     data = request.get_json()
     print(data)
+
     # Extract the data from the request
-    owner_id = session.get('owner_id')
-    property_type = data['property_type']
+    owner_id = g.current_user
     address = data['address']
-    city=data['city']
     bedrooms = data['bedrooms']
     description = data['description']
     price = data['price']
-    url = data['url']
-    
+    url = data['image_url']
+    property_type = data['type']
+    city = data['city']
 
     # Query MySQL database to insert the new property
     cursor = mysql.connection.cursor()
-    cursor.execute("INSERT INTO properties (owner_id, address,city, bedrooms, description, price, url, property_type) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (owner_id, address, city, bedrooms, description, price, url, property_type))
+    cursor.execute("INSERT INTO properties (owner_id, address, bedrooms, description, price, url, type, city) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",(owner_id, address, bedrooms, description, price, url, property_type, city))
     mysql.connection.commit()
     cursor.close()
 
@@ -176,7 +162,7 @@ def get_existing_property(property_id):
         return jsonify({"error": "Property does not exist"}), 404
 
     # Otherwise, return the property as a JSON response
-    return jsonify({"property": result}), 200
+    return jsonify(result), 200
 
 
 @app.route("/register", endpoint='register', methods=['POST'])
@@ -248,7 +234,8 @@ def change_password():
     # Return a success message
     return jsonify({"change_password": "success"}), 200
 
-@app.route("/update_property", endpoint='update_property', methods=['PUT'])
+@app.route("/update_property", endpoint='update_property', methods=['PUT', 'OPTIONS'])
+@authenticate
 def update_property():
 
     data = request.get_json()
@@ -256,7 +243,7 @@ def update_property():
 
     # Extract the data from the request
     property_id = data['property_id']
-    owner_id = data['owner_id']
+    owner_id = g.current_user
     address = data['address']
     bedrooms = data['bedrooms']
     description = data['description']
@@ -311,14 +298,16 @@ def delete_property():
     return jsonify({"delete_property": "success"}), 200
 
 @app.route("/my_properties", endpoint='my_properties', methods=['GET'])
+@authenticate
 def view_my_properties():
 
     # Get the authenticated house owner's ID from the session
-    owner_id = session.get('owner_id', None)
+    owner_id = g.current_user
+    print("Logged in user:>>",g.current_user)
 
     # If the house owner is not logged in, return an error message
-    if owner_id is None:
-        return jsonify({"error": "Not logged in"}), 401
+    # if owner_id is None:
+    #     return jsonify({"error": "Not logged in"}), 401
 
     # Query MySQL database for the house owner's properties
     cursor = mysql.connection.cursor()
@@ -393,13 +382,13 @@ def submit_property_request():
     if result is None:
         abort(404)
 
-    owner_email = result[0]
-
+    owner_email = result.get('email')
+    print(owner_email)
     # Send an email notification to the property owner
     # You can use a library like Flask-Mail to send emails
     # Here is an example using Flask-Mail
     msg = Message(subject="New Property Request",
-                  sender=(name, email),
+                  sender="sampledbsproject@outlook.com",
                   recipients=[owner_email])
     msg.body = f"You have a new property request for property ID {property_id}. \n\nName: {name}\nEmail: {email}\nPhone: {phone}\n\nMessage:\n{description_message}"
     mail.send(msg)
