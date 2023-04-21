@@ -161,6 +161,7 @@ Kaushik's Contribution:
 
 Vibhav's Contribution:
 
+- Made user and contex diagram to make better understanding of the system & requirement.
 - Backend Implementation Using Flask
 - Update Property API end point
 - Submit Property Request API end point
