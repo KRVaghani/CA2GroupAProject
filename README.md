@@ -45,6 +45,7 @@ Clone the repository:
 ```bash
   git clone https://github.com/KRVaghani/CA2GroupAProject.git
 ```
+
 First setup database:
 
 ```bash
@@ -64,6 +65,7 @@ This will start the Flask server on localhost:5000
 ```bash
   python app.py 	 
 ``` 
+
 Install the frontend required packages:
 
 ```bash
@@ -197,6 +199,7 @@ Victor's Contribution:
 ### Use Case Diagram
 
 ![App Screenshot](https://github.com/KRVaghani/CA2GroupAProject/blob/main/Screenshots/Use%20Case%20Diagram.jpg?raw=true)
+
 
 ## Refernces
 
