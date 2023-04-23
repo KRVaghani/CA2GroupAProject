@@ -48,7 +48,7 @@ Clone the repository:
 First setup database:
 
 ```bash
-  cd CA2GroupAProject/Backend/database 
+  cd CA2GroupAProject/Backend/Database 
 ```
 
 Install the backend required packages:
