@@ -1,8 +1,8 @@
 # First need to run jason server through bellow command
 
-# node v16.19.1
+# we are using node v16.19.1
 
-`json-server --watch db.json --port 3001` and then react application will start
+then react application will start
 
 # Getting Started with Create React App
 

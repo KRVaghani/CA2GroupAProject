@@ -85,6 +85,22 @@ const HouseRentalDetail = () => {
         setDescription("");
       }, 5000);
     }
+
+    const requestData = {
+      property_id: Id,
+      name: fullname,
+      email: email,
+      phone: number,
+      description_message: description,
+      // Add other form data here
+    };
+    
+    // Post the form data to the server
+    axios.post(`http://127.0.0.1:5000/submit_property_request`, requestData)
+      .then((res) => {
+        console.log(res.data.property);
+        // setDataHouse(res.data.property);
+      });
   };
 
   const handleCancel = () => {
@@ -121,43 +137,36 @@ const HouseRentalDetail = () => {
       <div className="flex flex-col  items-start bg-white border rounded-lg shadow-md md:flex-row  hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700">
         <img
           className="object-cover p-5 w-full rounded-t-lg h-96 md:h-auto md:w-80 md:rounded-none md:rounded-l-lg "
-          src={dataHouse.company_image_url}
+          src={dataHouse.Url}
         />
         <div className="flex flex-col justify-between text-left m-4 p-2 leading-normal w-full ">
           <h2 className="mb-2 font-bold tracking-tight text-gray-900 dark:text-white text-xl">
-            {dataHouse.title + " (" + dataHouse.Rent_tenure + ")"}
+            {dataHouse.Type + " (" + dataHouse.city + ")"}
           </h2>
           <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
-            {dataHouse.company_name + " - " + dataHouse.Rent_type}
+            {dataHouse.address}
           </p>
-          <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
-            {dataHouse.company_city}
-          </p>
-          <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
-            {dataHouse.Rent_status == 1
-              ? "Actively Recruiting"
-              : "Stop Recruiting"}
-          </p>
+          
           <hr />
           <p className="mb-3 mt-3 font-bold text-gray-700 dark:text-gray-400 text-lg">
             Description
           </p>
           <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
-            {dataHouse.Rent_description}
+            {dataHouse.description}
           </p>
           <hr />
           <p className="mb-3 mt-3 font-bold text-gray-700 dark:text-gray-400 text-lg">
-            Qualification
+            Bedroom
           </p>
           <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
-            {dataHouse.Rent_qualification}
+            {dataHouse.bedrooms}
           </p>
           <hr />
           <p className="mb-3 mt-3 font-bold text-gray-700 dark:text-gray-400 text-lg">
-            Salary
+            Price
           </p>
           <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
-            {"ER." + dataHouse.salary_min + " - ER." + dataHouse.salary_max}
+            {"€" + dataHouse.price}
           </p>
           <div style={{ display: 'flex' }}>
           <a>
@@ -242,7 +251,7 @@ const HouseRentalDetail = () => {
               {error && <div className="error-message">{error}</div>}
             <div style={{ display: 'flex'}}>
             <Button style={{width: '100%'}} onClick={handleApply} className="w-32" type={"submit"}>
-                Request
+                Send
               </Button>
               <Button  style={{marginLeft:"20px", width:"100%"}} onClick={handleCancel} className="w-32" type={"cancel"}>
                 Cancel

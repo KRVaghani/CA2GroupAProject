@@ -1,14 +1,14 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Label, TextInput, Button } from "flowbite-react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { GlobalContext } from "../context/GlobalProvider";
 import { useContext } from "react";
+import userEvent from "@testing-library/user-event";
 const Form = () => {
   let { idData } = useParams();
   const { state, handleFunction } = useContext(GlobalContext);
   const { input, setInput, setCurrentId } = state;
-
   const { handleInput, handleSubmit } = handleFunction;
 
   useEffect(() => {
@@ -27,6 +27,7 @@ const Form = () => {
             address: data.address,
             city: data.city,
             bedrooms: data.bedrooms,
+            image_url: data.url,
             image_url: data.image_url,
             price: data.price,
           });
@@ -97,7 +98,7 @@ const Form = () => {
           <TextInput
             id="Bedrooms"
             name="Bedrooms"
-            value={input.Bedrooms}
+            value={input.bedrooms}
             type="number"
             onChange={handleInput}
             required={true}

@@ -1,8 +1,7 @@
 import React from "react";
 import { Navbar } from "flowbite-react";
 import Cookies from "js-cookie";
-import Logo from "../assets/images/logo.png";
-import { useNavigate } from "react-router-dom";
+import { Route, Routes, useNavigate, BrowserRouter } from "react-router-dom";
 
 function Navigation() {
   let navigate = useNavigate();
@@ -22,17 +21,27 @@ function Navigation() {
         </Navbar.Brand>
         <Navbar.Toggle />
         <Navbar.Collapse>
-          <Navbar.Link href="/">Home</Navbar.Link>
+          <Navbar.Link onClick={() => {
+              
+                navigate("/");
+              }}>Home</Navbar.Link>
           {/* <Navbar.Link href="/HouseRental">HouseRental</Navbar.Link> */}
           
           {!Cookies.get("token") && (
-            <Navbar.Link href="/Login">Login</Navbar.Link>
+           <Navbar.Link onClick={() => {
+         
+            navigate("/Login");
+          }} >Login</Navbar.Link>
           )}
           {Cookies.get("token") && (
-            <Navbar.Link href="/Dashboard">Dashboard</Navbar.Link>
+            <Navbar.Link onClick={() => {
+              
+              navigate("/Dashboard");
+            }}>Dashboard</Navbar.Link>
+            
           )}
           {Cookies.get("token") && (
-            <Navbar.Link
+            <Navbar.Link 
               onClick={() => {
                 Cookies.remove("token");
                 navigate("/Login");
