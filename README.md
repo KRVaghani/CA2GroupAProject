@@ -196,9 +196,11 @@ Victor's Contribution:
 - Search Properties
 
 
-### Use Case Diagram
 
-![App Screenshot](https://github.com/KRVaghani/CA2GroupAProject/blob/main/Screenshots/Use%20Case%20Diagram.jpg?raw=true)
+## Design screenshots
+
+![App Screenshot](https://raw.githubusercontent.com/KRVaghani/CA2GroupAProject/main/Screenshots/ss1.png)
+![App Screenshot](https://github.com/KRVaghani/CA2GroupAProject/blob/main/Screenshots/ss2.png?raw=true)
 
 
 ## Refernces
