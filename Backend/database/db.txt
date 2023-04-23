@@ -1,0 +1,38 @@
+CREATE USER 'web'@'localhost' IDENTIFIED BY 'webPass';GRANT ALL PRIVILEGES ON . to 'web'@'localhost';
+
+CREATE DATABASE housepro; USE housepro;CREATE TABLE house_owners (
+  id INT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  phone VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY email_unique (email)
+);
+
+CREATE TABLE properties (
+  id INT NOT NULL AUTO_INCREMENT,
+  owner_id INT NOT NULL,
+  address VARCHAR(255) NOT NULL,
+  city VARCHAR(255) NOT NULL,
+  bedrooms INT NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  price DECIMAL(10, 2) NOT NULL,
+  url VARCHAR(255) NOT NULL,
+  type VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (owner_id) REFERENCES house_owners(id)
+);
+
+
+CREATE TABLE property_request (
+  id INT NOT NULL AUTO_INCREMENT,
+  property_id INT NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  phone VARCHAR(255) NOT NULL,
+  description_message VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (property_id) REFERENCES properties(id)
+);
+exit;

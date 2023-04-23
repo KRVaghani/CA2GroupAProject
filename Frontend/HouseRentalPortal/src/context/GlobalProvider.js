@@ -76,7 +76,7 @@ export const GlobalProvider = (props) => {
 
   //Handle Search and Filter
 
-  const [dataHouse, setdataHouse] = useState(null);
+  const [dataHouse, setDataHouse] = useState(null);
   const [fetchStatus, setFetchStatus] = useState(true);
   const [filterHouseType, setFilterHouseType] = useState(null);
   const [filterCity, setFilterCity] = useState(null);
@@ -96,15 +96,15 @@ export const GlobalProvider = (props) => {
     axios
       .get("http://127.0.0.1:5000/search_properties?q=" + search)
       .then((res) => {
-        setdataHouse(res.data);
-        // console.log(res.data);
-        // let searchData = res.data.filter((res) => {
-        //   return Object.values(res)
-        //     .join(" ")
-        //     .toLowerCase()
-        //     .includes(search.toLowerCase());
-        // });
-        // setdataHouse([...searchData]);
+        // setDataHouse("kaushik");
+        console.log(res.data);
+        let searchData = res.data.filter((res) => {
+          return Object.values(res)
+            .join(" ")
+            .toLowerCase()
+            .includes(search.toLowerCase());
+        });
+        setDataHouse([...searchData]);
       })
       .catch((error) => {
         console.error(error);
@@ -125,7 +125,7 @@ export const GlobalProvider = (props) => {
     axios
       .get("http://127.0.0.1:5000/property")
       .then((res) => {
-        setdataHouse(res.data);
+        setDataHouse(res.data);
         console.log("kaushik",res.data);
         let filterData = res.data.filter((res) => {
           console.log(filter.type);
@@ -136,7 +136,7 @@ export const GlobalProvider = (props) => {
         });
 
         console.log(filterData);
-        setdataHouse([...filterData]);
+        setDataHouse([...filterData]);
       });
   };
 
@@ -174,23 +174,24 @@ export const GlobalProvider = (props) => {
   });
 
   const handleInput = (event) => {
+    console.log("Event is :>>", event.target.name)
     let name = event.target.name;
     let value = event.target.value;
 
     if (name === "type") {
       setInput({ ...input, type: value });
     } else if (name === "House_description") {
-      setInput({ ...input, House_description: value });
+      setInput({ ...input, description: value });
     } else if (name === "Address") {
-      setInput({ ...input, Address: value });
+      setInput({ ...input, address: value });
     } else if (name === "City") {
-      setInput({ ...input, City: value });
+      setInput({ ...input, city: value });
     } else if(name === "Bedrooms") {
-      setInput({ ...input, Bedrooms: value });
+      setInput({ ...input, bedrooms: value });
     } else if (name === "Image_url") {
-      setInput({ ...input, Image_url: value });
+      setInput({ ...input, image_url: value });
     } else if (name === "Price") {
-      setInput({ ...input, Price: value });
+      setInput({ ...input, price: value });
     } 
   };
 
@@ -218,7 +219,7 @@ export const GlobalProvider = (props) => {
             image_url,
             price,
           },
-          { headers: { Authorization: "Bearer " + Cookies.get("token") } }
+          { headers: { Authorization: Cookies.get("token") } }
         )
         .then((res) => {
           console.log(res);
@@ -299,7 +300,7 @@ export const GlobalProvider = (props) => {
     inputRegistration,
     setInputRegistration,
     dataHouse,
-    setdataHouse,
+    setDataHouse,
     fetchStatus,
     setFetchStatus,
     filterHouseType,

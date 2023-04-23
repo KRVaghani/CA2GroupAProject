@@ -3,6 +3,7 @@ import axios from "axios";
 import { Button } from "flowbite-react";
 import { GlobalContext } from "../context/GlobalProvider";
 import { useContext } from "react";
+import Cookies from 'js-cookie';
 const Tables = () => {
   const { state, handleFunction } = useContext(GlobalContext);
 
@@ -11,10 +12,8 @@ const Tables = () => {
     setDataHouse,
     fetchStatus,
     setFetchStatus,
-    filterStatehouseType,
-    setFilterStatehouseType,
-    filterStateRentCategory,
-    setFilterStateRentCategory,
+    filterHouseType,
+    setfilterHouseType,
     filterCity,
     setFilterCity,
     search,
@@ -40,7 +39,7 @@ const Tables = () => {
 
       return tmp;
     };
-    let insertFilterStatehouseType = (param) => {
+    let insertfilterHouseType = (param) => {
       let tmp = [];
       param.map((res) => {
         tmp.push({ Rent_type: res.Rent_type });
@@ -87,19 +86,20 @@ const Tables = () => {
 
     if (fetchStatus) {
       axios
-        .get("http://127.0.0.1:5000/properties")
+        .get("http://127.0.0.1:5000/my_properties", {headers: {
+          Authorization: Cookies.get("token")
+        }})
         .then((res) => {
-          setDataHouse(res.data);
-          let data = res.data;
-          let temp1 = insertFilterStatehouseType(data);
+          console.log("kaushik");
+          setDataHouse(res.data.properties);
+          
+          let data = res.data.properties;
+          let temp1 = insertfilterHouseType(data);
           let temp2 = removeDuplicatehouseType(temp1);
-          setFilterStatehouseType(temp2);
+          setfilterHouseType(temp2);
           temp1 = insertfilterCity(data);
           temp2 = removeDuplicateCity(temp1);
           setFilterCity(temp2);
-          temp1 = insertFilterStateRentCategory(data);
-          temp2 = removeDuplicateRentCategory(temp1);
-          setFilterStateRentCategory(temp2);
         });
       setFetchStatus(false);
     }
@@ -139,7 +139,7 @@ const Tables = () => {
             type="search"
             id="default-search"
             className="block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            placeholder="Search rentlocation, position..."
+            placeholder="Search House location, details..."
           />
           <button
             type="submit"
@@ -157,7 +157,6 @@ const Tables = () => {
             htmlFor="House_type"
             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
           >
-            houseType
           </label>
           <select
             name="House_type"
@@ -165,40 +164,13 @@ const Tables = () => {
             onChange={handleChangeFilter}
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
-            <option value="houseType">houseType...</option>
-            {filterStatehouseType !== null && (
+            <option value="houseType">House Type...</option>
+            {filterHouseType !== null && (
               <>
-                {filterStatehouseType.map((res) => {
+                {filterHouseType.map((res) => {
                   return (
                     <>
-                      <option defaultValue={`${res}`}>{res}</option>
-                    </>
-                  );
-                })}
-              </>
-            )}
-          </select>
-        </div>
-        <div>
-          <label
-            htmlFor="Rent_category"
-            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >
-            rentCategory
-          </label>
-          <select
-            name="Rent_category"
-            id="Rent_category"
-            onChange={handleChangeFilter}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          >
-            <option value="rentCategory">rentCategory...</option>
-            {filterStateRentCategory !== null && (
-              <>
-                {filterStateRentCategory.map((res) => {
-                  return (
-                    <>
-                      <option defaultValue={`${res}`}>{res}</option>
+                      <option defaultValue={`${res[2]}`}>{res[2]}</option>
                     </>
                   );
                 })}
@@ -211,7 +183,6 @@ const Tables = () => {
             htmlFor="House_type"
             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
           >
-            City
           </label>
           <select
             name="city"
@@ -219,13 +190,13 @@ const Tables = () => {
             onChange={handleChangeFilter}
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
-            <option value="houseType">rentCity...</option>
+            <option value="houseType">House Area...</option>
             {filterCity !== null && (
               <>
                 {filterCity.map((res) => {
                   return (
                     <>
-                      <option defaultValue={`${res}`}>{res}</option>
+                      <option defaultValue={`${res[3]}`}>{res[3]}</option>
                     </>
                   );
                 })}
@@ -252,41 +223,27 @@ const Tables = () => {
       <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400 border-solid border-2 border-gray-50">
         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <tr>
-            <th scope="col" className="px-2 py-3">
-              No
-            </th>
-            <th scope="col" className="px-2 py-3">
-              Title
-            </th>
-            <th scope="col" className="px-2 py-3">
-              Description
-            </th>
-            <th scope="col" className="px-2 py-3">
-              Qualification
+          <th scope="col" className="px-2 py-3">
+            Image URL
             </th>
             <th scope="col" className="px-2 py-3">
               Type
             </th>
             <th scope="col" className="px-2 py-3">
-              Tenure
+            Description
             </th>
             <th scope="col" className="px-2 py-3">
-              Status
+            Address
             </th>
             <th scope="col" className="px-2 py-3">
-              Company Name
+            City
             </th>
             <th scope="col" className="px-2 py-3">
-              Company Image
+            Bedrooms
             </th>
+           
             <th scope="col" className="px-2 py-3">
-              City
-            </th>
-            <th scope="col" className="px-2 py-3">
-              Min Salary
-            </th>
-            <th scope="col" className="px-2 py-3">
-              Max Salary
+            Price
             </th>
             <th scope="col" className="px-2 py-3">
               Action
@@ -294,35 +251,32 @@ const Tables = () => {
           </tr>
         </thead>
         <tbody>
-          {dataHouse!== null &&
+          {dataHouse &&
             dataHouse.map((res, index) => {
               return (
                 <tr
                   key={res.id}
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                 >
-                  <td className="px-2 py-4">{index + 1}</td>
-                  <td className="px-2 py-4">{res.title}</td>
-                  <td className="px-2 py-4">
-                    {res.Rent_description.substr(0, 50) + "..."}
-                  </td>
-                  <td className="px-2 py-4">
-                    {res.Rent_qualification.substr(0, 50) + "..."}
-                  </td>
-                  <td className="px-2 py-4">{res.Rent_type}</td>
-                  <td className="px-2 py-4">{res.Rent_tenure}</td>
-                  <td className="px-2 py-4">{res.Rent_status}</td>
-                  <td className="px-2 py-4">{res.company_name}</td>
-                  <td className="px-2 py-4">
-                    <img
+                  {/* <td className="px-2 py-4">{res.Url? res.Url.substr(0,10) + "...": ""}</td> */}
+                  <td className="px-2 py-4">{res.Url?    <img
                       className="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-48 md:rounded-none md:rounded-l-lg "
-                      src={res.company_image_url}
+                      src={res.Url}
                       alt=""
-                    />
+                    />: ""}</td>
+
+                  <td className="px-2 py-4">{res.Type}</td>
+                  <td className="px-2 py-4">{res.description}</td>
+                  <td className="px-2 py-4">
+                    {res.address}
                   </td>
-                  <td className="px-2 py-4">{res.city}</td>
-                  <td className="px-2 py-4">{res.salary_min}</td>
-                  <td className="px-2 py-4">{res.salary_max}</td>
+                  <td className="px-2 py-4">
+                    {res.city}
+                  </td>
+                  <td className="px-2 py-4">{res.bedrooms}</td>
+                  
+                  <td className="px-2 py-4">{res.price}</td>
+                  
                   <td className="px-2 py-4">
                     <div className="flex flex-wrap gap-2">
                       <Button

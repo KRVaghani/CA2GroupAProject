@@ -1,4 +1,5 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { GlobalContext } from "../context/GlobalProvider";
@@ -11,10 +12,8 @@ const RentCard = () => {
     setDataHouse,
     fetchStatus,
     setFetchStatus,
-    filterStatehouseType,
-    setFilterStatehouseType,
-    filterStateRentCategory,
-    setFilterStateRentCategory,
+    filterHouseType,
+    setFilterHouseType,
     filterCity,
     setFilterCity,
     search,
@@ -39,7 +38,7 @@ const RentCard = () => {
 
       return tmp;
     };
-    let insertFilterStatehouseType = (param) => {
+    let insertFilterHouseType = (param) => {
       let tmp = [];
       param.map((res) => {
         tmp.push({ Rent_type: res.Rent_type });
@@ -47,24 +46,6 @@ const RentCard = () => {
       return tmp;
     };
 
-    let removeDuplicateRentCategory = (param) => {
-      let tmp = [];
-
-      for (let i of param) {
-        if (tmp.indexOf(i.Rent_category) === -1) {
-          tmp.push(i.Rent_category);
-        }
-      }
-
-      return tmp;
-    };
-    let insertFilterStateRentCategory = (param) => {
-      let tmp = [];
-      param.map((res) => {
-        tmp.push({ Rent_category: res.Rent_category });
-      });
-      return tmp;
-    };
     let removeDuplicateCity = (param) => {
       let tmp = [];
 
@@ -86,20 +67,19 @@ const RentCard = () => {
 
     if (fetchStatus) {
       axios
-        .get("http://127.0.0.1:5000/properties")
+        .get("http://127.0.0.1:5000/properties", {headers:{
+          Authorization: Cookies.get("token")
+        }})
         .then((res) => {
           console.log(res.data.properties);
           setDataHouse(res.data.properties);
           let data = res.data.properties;
-          let temp1 = insertFilterStatehouseType(data);
+          let temp1 = insertFilterHouseType(data);
           let temp2 = removeDuplicatehouseType(temp1);
-          setFilterStatehouseType(temp2);
+          setFilterHouseType(temp2);
           temp1 = insertfilterCity(data);
           temp2 = removeDuplicateCity(temp1);
           setFilterCity(temp2);
-          temp1 = insertFilterStateRentCategory(data);
-          temp2 = removeDuplicateRentCategory(temp1);
-          setFilterStateRentCategory(temp2);
     
         });
       setFetchStatus(false);
@@ -162,9 +142,9 @@ const RentCard = () => {
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
             <option value="houseType">House Type...</option>
-            {filterStatehouseType !== null && (
+            {filterHouseType !== null && (
               <>
-                {filterStatehouseType.map((res) => {
+                {filterHouseType.map((res) => {
                   return (
                     <>
                       <option defaultValue={`${res}`}>{res}</option>
@@ -208,22 +188,23 @@ const RentCard = () => {
       </form>
       <div className="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6 ">
         <div className="grid gap-8 mb-6 lg:mb-16 sm:grid-cols-2">
-          {dataHouse!== null &&
+          {dataHouse &&
             dataHouse.map((res) => {
+              console.log(res);
               return (
                 <Link
-                  to={`/HouseRental/${res}`}
+                  to={`/HouseRental/${res.id}`}
                   key={res.id}
                   className="flex flex-col items-center bg-white border rounded-lg shadow-md md:flex-row md:max-w-xl hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
                 >
                   <img
                     className="object-cover w-full rounded-t-lg h-96 md:h-auto md:w-48 md:rounded-none md:rounded-l-lg "
-                    src={res.image_url}
+                    src={res.Url}
                     alt=""
                   />
                   <div className="flex flex-col justify-between text-left p-4 leading-normal">
                     <h5 className="mb-2  font-bold tracking-tight text-gray-900 dark:text-white">
-                      {res.type + " (" + res.city + ")"}
+                      {res.Type + " (" + res.city + ")"}
                     </h5>
                     <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
                       {res.address}

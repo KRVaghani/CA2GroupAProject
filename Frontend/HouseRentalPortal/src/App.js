@@ -28,7 +28,6 @@ function App() {
   }, []);
 
   const LoginRoute = (props) => {
-    console.log(Cookies.get("token"));
     if (Cookies.get("token") !== undefined) {
       return props.children;
     } else if (Cookies.get("token") === undefined) {
@@ -68,10 +67,9 @@ function App() {
             <Route
               path="/Login"
               element={
-             
-                <LoginGuard element={<LoginPage/>}/>
+                <LoginGuard element={LoginPage} />
                 // <LoginRoute element={<LoginPage />} />
-               
+
               }
             />
 
