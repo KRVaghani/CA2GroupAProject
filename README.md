@@ -45,7 +45,13 @@ Clone the repository:
 ```bash
   git clone https://github.com/KRVaghani/CA2GroupAProject.git
 ```
-Install the required packages:
+First setup database:
+
+```bash
+  cd CA2GroupAProject/Backend/database 
+```
+
+Install the backend required packages:
 
 ```bash
   cd CA2GroupAProject/Backend/HouseRentalService
@@ -58,6 +64,14 @@ This will start the Flask server on localhost:5000
 ```bash
   python app.py 	 
 ``` 
+Install the frontend required packages:
+
+```bash
+  cd CA2GroupAProject/Frontend/HouseRentalPortal
+  we are used nodejs 16.19.1 version in our project frontend
+  npm install 
+```
+
 Start the client: 
 
 This will start the React development server on localhost:3000 
@@ -178,6 +192,11 @@ Victor's Contribution:
 
 - Delete Property API end point
 - Search Properties
+
+
+### Use Case Diagram
+
+![App Screenshot](https://github.com/KRVaghani/CA2GroupAProject/blob/main/Screenshots/Use%20Case%20Diagram.jpg?raw=true)
 
 ## Refernces
 
